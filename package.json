@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev:ui": "next dev",
+    "dev:engines": "python start_all_engines.py",
+    "dev": "concurrently -c \"cyan,magenta\" -n \"UI,ENGINES\" \"npm run dev:ui\" \"npm run dev:engines\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

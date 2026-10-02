@@ -118,7 +118,7 @@ const translations = {
   }
 };
 
-// --- ALL 8 TOOL DEFINITIONS WITH EN & HI SUPPORT ---
+// --- ALL SECURITY TOOL DEFINITIONS WITH EN & HI SUPPORT ---
 const toolDefinitions = [
   {
     id: 'password',
@@ -167,13 +167,24 @@ const toolDefinitions = [
   {
     id: 'sms',
     category: 'threat',
-    path: '/tools/ssl',
+    path: '/tools/sms',
     port: '5007',
     icon: <Smartphone className="w-5 h-5" />,
-    nameEn: 'SMS Detector',
+    nameEn: 'SMS & Smishing Detector',
     nameHi: 'एसएमएस डिटेक्टर',
     descEn: 'Detect fraudulent text messages, smishing links, and spam senders.',
     descHi: 'धोखाधड़ी वाले पाठ संदेशों, स्मिशिंग लिंक और स्पैम प्रेषकों का पता लगाएं।',
+  },
+  {
+    id: 'ssl',
+    category: 'crypto',
+    path: '/tools/ssl',
+    port: '5006',
+    icon: <Lock className="w-5 h-5" />,
+    nameEn: 'SSL/TLS Checker',
+    nameHi: 'एसएसएल चेकर',
+    descEn: 'Inspect X.509 cryptographic certificate validity and TLS handshake health.',
+    descHi: 'क्रिप्टोग्राफिक प्रमाणपत्र वैधता और टीएलएस हैंडशेक स्थिति का निरीक्षण करें।',
   },
   {
     id: 'malware',

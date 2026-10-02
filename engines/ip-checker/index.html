@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase 7: IP Tracker</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #050b14;
+            --panel-bg: rgba(10, 17, 30, 0.85);
+            --neon-blue: #00f0ff;
+            --neon-blue-dim: rgba(0, 240, 255, 0.2);
+            --danger-red: #ff2a2a;
+            --text-main: #e2e8f0;
+        }
+
+        body { 
+            font-family: 'JetBrains Mono', monospace; 
+            background-color: var(--bg-color);
+            background-image: 
+                linear-gradient(var(--neon-blue-dim) 1px, transparent 1px),
+                linear-gradient(90deg, var(--neon-blue-dim) 1px, transparent 1px);
+            background-size: 30px 30px;
+            color: var(--text-main); 
+            padding: 0; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            min-height: 100vh;
+            overflow: hidden; 
+            perspective: 1000px; 
+        }
+
+        /* =========================================
+           COMBINED JARVIS BOOT OVERLAY
+           ========================================= */
+        #boot-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #02060d;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s ease-out;
+            gap: 40px; /* Space between circle and terminal */
+        }
+
+        /* The Glowing Center Circle */
+        .sentinel-circle {
+            width: 160px; height: 160px;
+            border-radius: 50%;
+            border: 4px solid var(--neon-blue);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 0 30px var(--neon-blue), inset 0 0 20px var(--neon-blue);
+            animation: pulseCircle 2s infinite;
+            position: relative;
+        }
+        
+        .sentinel-circle::after {
+            content: '';
+            position: absolute;
+            top: -12px; left: -12px; right: -12px; bottom: -12px;
+            border-radius: 50%;
+            border: 2px solid var(--neon-blue-dim);
+            border-left-color: var(--danger-red); /* Adds the dual-color spin */
+            animation: spinReverse 2s linear infinite;
+        }
+
+        .sentinel-circle h3 {
+            color: var(--neon-blue);
+            font-size: 0.95rem;
+            line-height: 1.4;
+            margin: 0;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--neon-blue);
+            animation: pulseText 1.5s infinite;
+        }
+
+        /* The Typing Terminal Below */
+        .terminal-container {
+            width: 80%;
+            max-width: 650px;
+            color: var(--neon-blue);
+            font-size: 0.95rem;
+            text-align: left;
+            min-height: 220px; /* Keeps the page from jumping while typing */
+        }
+
+        .terminal-line {
+            margin: 6px 0;
+            opacity: 0;
+            text-shadow: 0 0 5px var(--neon-blue-dim);
+        }
+
+        @keyframes pulseCircle { 0%, 100% { transform: scale(1); box-shadow: 0 0 30px var(--neon-blue), inset 0 0 20px var(--neon-blue); } 50% { transform: scale(1.05); box-shadow: 0 0 45px var(--neon-blue), inset 0 0 25px var(--neon-blue); } }
+        @keyframes pulseText { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        @keyframes spinReverse { 0% { transform: rotate(0deg); } 100% { transform: rotate(-360deg); } }
+
+        /* =========================================
+           MAIN APP STYLES 
+           ========================================= */
+        #main-app {
+            opacity: 0;
+            transform: scale(0.95) rotateX(2deg) translateY(-20px); 
+            transition: all 1s ease-in-out;
+            width: 100%;
+            max-width: 650px;
+            display: none; 
+            perspective: 500px; 
+        }
+
+        .card { 
+            background: var(--panel-bg); 
+            padding: 2rem; 
+            border-radius: 12px; 
+            border: 1px solid rgba(0, 240, 255, 0.3); 
+            box-shadow: 0 0 40px rgba(0, 240, 255, 0.2), inset 0 0 25px rgba(0, 240, 255, 0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+
+        .card::after {
+            content: "";
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(0, 240, 255, 0.1) 50%, rgba(255,255,255,0) 100%);
+            transform: rotate(30deg);
+            animation: scanline 8s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes scanline { 0% { transform: translateY(-100%) rotate(30deg); } 100% { transform: translateY(100%) rotate(30deg); } }
+
+        h2 { color: var(--neon-blue); margin-top: 0; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px var(--neon-blue); }
+        .input-group { display: flex; gap: 10px; margin-top: 20px; }
+        
+        input { 
+            flex-grow: 1; padding: 12px 15px; border-radius: 6px; border: 1px solid #334155; 
+            background: rgba(0,0,0,0.5); color: var(--neon-blue); font-family: 'JetBrains Mono', monospace; font-size: 1rem; outline: none;
+        }
+        input:focus { border-color: var(--neon-blue); box-shadow: 0 0 15px var(--neon-blue-dim); }
+
+        button { 
+            padding: 12px 24px; background: transparent; color: var(--neon-blue); border: 1px solid var(--neon-blue);
+            border-radius: 6px; cursor: pointer; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; font-family: 'JetBrains Mono', monospace; transition: all 0.2s ease;
+        }
+        button:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
+
+        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .data-box { background: rgba(0, 0, 0, 0.6); padding: 15px; border-radius: 8px; border-left: 3px solid var(--neon-blue); font-size: 0.9rem; line-height: 1.6; }
+        .threat-box { border-left-color: var(--danger-red); }
+        .highlight-blue { color: var(--neon-blue); font-weight: bold; }
+        .highlight-red { color: var(--danger-red); font-weight: bold; text-shadow: 0 0 5px rgba(255, 42, 42, 0.5); }
+
+        #map { height: 350px; width: 100%; border-radius: 8px; margin-top: 20px; display: none; border: 1px solid #334155; filter: invert(90%) hue-rotate(180deg) brightness(95%) contrast(85%); }
+        .pulse-text { animation: pulseText 1.5s ease-in-out infinite; }
+    </style>
+</head>
+<body>
+
+    <div id="boot-screen">
+        <div class="sentinel-circle">
+            <h3>SENTINEL AI<br>BOOTING UP</h3>
+        </div>
+        <div class="terminal-container" id="terminal">
+            </div>
+    </div>
+
+    <div id="main-app">
+        <div class="card">
+            <h2>🛰️ Phase 7: IP Reputation Engine</h2>
+            <p style="font-size: 0.85rem; color: #64748b; margin: 0;">GLOBAL THREAT INTEL // ISOLATED MODULE // PORT: 5005</p>
+            
+            <div class="input-group">
+                <input type="text" id="ipInput" placeholder="Enter target IPv4 (e.g., 8.8.8.8)">
+                <button onclick="scanIP()" id="scanBtn">Execute Scan</button>
+            </div>
+
+            <div id="results" style="display: none;">
+                <div class="data-grid">
+                    <div class="data-box" id="geoData"></div>
+                    <div class="data-box threat-box" id="threatData"></div>
+                </div>
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- BOOT SEQUENCE LOGIC ---
+        const bootSequence = [
+            "Initializing Sentinel OS Kernel v4.0.2...",
+            "Loading cryptographic modules [OK]",
+            "Establishing secure uplink to global threat databases...",
+            "Bypassing local proxies [OK]",
+            "Allocating memory for geographic mapping engine...",
+            "Calibrating orbital sensors [OK]",
+            "WARNING: Unauthorized access will be logged and traced.",
+            "System boot complete. Handing over control to user."
+        ];
+
+        async function runBootSequence() {
+            const terminal = document.getElementById('terminal');
+            const bootScreen = document.getElementById('boot-screen');
+            const mainApp = document.getElementById('main-app');
+
+            // Type out each line dynamically while the circle pulses
+            for (let i = 0; i < bootSequence.length; i++) {
+                const line = document.createElement('div');
+                line.className = 'terminal-line';
+                line.textContent = `> ${bootSequence[i]}`;
+                terminal.appendChild(line);
+                
+                // Fade in the line
+                setTimeout(() => line.style.opacity = '1', 50);
+                
+                // Wait between 200ms and 500ms before typing the next line
+                const delay = Math.random() * 300 + 200;
+                await new Promise(r => setTimeout(r, delay));
+            }
+
+            // Pause for cinematic effect after terminal finishes
+            await new Promise(r => setTimeout(r, 800));
+
+            // Fade out the entire boot screen
+            bootScreen.style.opacity = '0';
+            
+            setTimeout(() => {
+                bootScreen.style.display = 'none';
+                mainApp.style.display = 'block';
+                setTimeout(() => {
+                    mainApp.style.opacity = '1';
+                    mainApp.style.transform = 'scale(1) rotateX(1deg) translateY(0px)'; 
+                }, 50);
+            }, 1000); 
+        }
+
+        window.onload = runBootSequence;
+
+        // --- IP TRACKER LOGIC ---
+        let ipMap = null;
+        let mapMarker = null;
+
+        async function scanIP() {
+            const ip = document.getElementById('ipInput').value;
+            if (!ip) return;
+
+            const btn = document.getElementById('scanBtn');
+            btn.innerText = "SCANNING...";
+            btn.style.boxShadow = "0 0 20px var(--neon-blue)";
+
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('geoData').innerHTML = "<span class='highlight-blue pulse-text'>> TRACING ROUTE...</span>";
+            document.getElementById('threatData').innerHTML = "<span class='highlight-red pulse-text'>> QUERYING DATABASES...</span>";
+            document.getElementById('map').style.display = 'none';
+
+            try {
+                const response = await fetch('http://127.0.0.1:5005/api/check-ip', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ip: ip })
+                });
+
+                const data = await response.json();
+
+                if (data.status === "success") {
+                    document.getElementById('geoData').innerHTML = 
+                        `<span class="highlight-blue">ISP:</span> ${data.geo.isp || 'UNKNOWN'} <br> 
+                         <span class="highlight-blue">LOC:</span> ${data.geo.city || 'UNKNOWN'}, ${data.geo.country || 'UNKNOWN'}`;
+                    
+                    document.getElementById('threatData').innerHTML = 
+                        `<span class="highlight-red">RISK SCORE:</span> ${data.threat_intel.score}% <br>
+                         <span class="highlight-red">STATUS:</span> ${data.threat_intel.status}`;
+
+                    document.getElementById('map').style.display = 'block';
+                    if (!ipMap) {
+                        ipMap = L.map('map').setView([data.geo.lat, data.geo.lon], 10);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(ipMap);
+                    } else {
+                        ipMap.setView([data.geo.lat, data.geo.lon], 10);
+                    }
+
+                    if (mapMarker) ipMap.removeLayer(mapMarker);
+                    mapMarker = L.marker([data.geo.lat, data.geo.lon]).addTo(ipMap);
+                }
+            } catch (err) {
+                document.getElementById('geoData').innerHTML = "<span class='highlight-red'>CONNECTION FAILURE. IS PORT 5005 ACTIVE?</span>";
+                document.getElementById('threatData').innerHTML = "";
+            } finally {
+                btn.innerText = "EXECUTE SCAN";
+                btn.style.boxShadow = "none";
+            }
+        }
+    </script>
+</body>
+</html>

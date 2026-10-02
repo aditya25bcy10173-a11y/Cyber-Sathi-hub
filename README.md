@@ -1,74 +1,113 @@
-# Project Sentinel: Multi-Engine Security Telemetry & Orchestration Dashboard
+# 🛡️ CYBER SAATHI HUB - Integrated Security & Telemetry Platform
 
-Project Sentinel is a modular, high-performance cybersecurity telemetry dashboard built to centralize diverse cryptographic, network, and heuristic security tools into a single, unified interface. 
-
-The architecture implements a **monorepo system using Git Submodules** to decouple the user interface from individual backend analysis microservices. This separation ensures that each utility remains light, isolated, and scalable, operating independently across dedicated network ports.
+Cyber Saathi Hub (Project Sentinel) is a modular, high-performance cybersecurity telemetry dashboard that unites AI/ML heuristic analysis, cryptographic verification, and network intelligence tools into a unified Next.js + Python microservices ecosystem.
 
 ---
 
-## 🏗️ Architectural Overview: Why & How
-
-### 1. Why a Distributed Microservices Architecture?
-Traditional monolithic security tools face tight dependency coupling. For instance, running a heavy **Transformer-based Natural Language Processing (NLP)** model for email phishing classification inside the same environment as a **low-latency TCP port scanner** introduces severe resource contention and dependency conflicts (e.g., Python AI libraries vs. Node.js system sockets).
-
-**The Solution:**
-Sentinel isolates every analysis utility into its own specialized Python Flask engine. 
-* **UI Layer:** Next.js (React) serves as a unified command center.
-* **Proxy Layer:** Next.js Server Actions establish point-to-point secure internal fetches to local loopback ports.
-* **Data Layer:** Supabase handles centralized authorization and PostgreSQL telemetry storage with Row-Level Security (RLS).
+## 🏛️ System Architecture
 
 ```text
-                     [ Next.js User Interface ]
-                                 │
-                     [ Next.js Server Actions ]
-                                 │
-         ┌───────────────────────┼───────────────────────┐
-         ▼                       ▼                       ▼
-   (Port 5000)             (Port 5001)             (Port 5008)
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│ Password Engine │     │   URL Engine    │     │  Email Engine   │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-                                 ▲                       │
-                                 └───────[Cross-API]─────┘
+                     ┌────────────────────────────────────────┐
+                     │   Next.js 16 Web Dashboard (Port 3000) │
+                     │   - Tailwind CSS v4 Cyber-Matrix UI    │
+                     │   - Bilingual (English & Hindi) Support│
+                     └───────────────────┬────────────────────┘
+                                         │ Next.js Server Actions
+                     ┌───────────────────┴────────────────────┐
+                     ▼                                        ▼
+ ┌──────────────────────────────────────┐  ┌──────────────────────────────────────┐
+ │       Forensics & Cryptography       │  │        Network & Heuristic AI        │
+ ├──────────────────────────────────────┤  ├──────────────────────────────────────┤
+ │ Port 5000: Password Entropy Engine   │  │ Port 5001: URL Phishing Detector     │
+ │ Port 5002: Hash Identifier v1.0      │  │ Port 5003: Asynchronous Port Scanner │
+ │ Port 5006: SSL/TLS Cert Inspector    │  │ Port 5004: File Malware Drop-Zone    │
+ │                                      │  │ Port 5005: IP Geolocation & BGP Trace│
+ │                                      │  │ Port 5007: SMS & Smishing Detector   │
+ │                                      │  │ Port 5008: Mal-Email NLP Detector    │
+ └──────────────────────────────────────┘  └──────────────────────────────────────┘
+```
 
+---
 
-Cross-Service Network Orchestration
-By exposing individual utility ports, services can safely interconnect. For example, when an operator inputs a raw payload into the Mal-Email NLP Orchestrator (Port 5008), the email engine automatically extracts Indicators of Compromise (IOCs). If it discovers embedded links, it generates a downstream cross-API POST request to the URL Threat Scanner (Port 5001) to complete a multi-layered verification chain before returning a master score to the UI.
+## 📁 Integrated Repository Layout
 
->>>Monorepo Directory Layout
-Plaintext
-sentinel-dashboard/
-├── app/                           # Next.js App Router (Root Filesystem Routing)
-│   ├── globals.css                # Red-Team Matrix Cyber-Aesthetic Design Layout
+```plaintext
+CYBER_SATHI_HUB/
+├── app/                           # Next.js App Router
+│   ├── globals.css                # Red-Team Cyber-Aesthetic Design Layout
 │   ├── layout.tsx                 # Core Viewport Global Context Providers
 │   ├── page.tsx                   # Master Telemetry Control Grid
-│   ├── login/                     # Restricted Access Authentication Portal
-│   └── tools/                     # Modular Tool-Glass UI Interfaces
+│   ├── login/                     # Terminal Access Portal
+│   └── tools/                     # Modular Security Tool Interfaces
 │       ├── email/                 # NLP Phishing Interface
-│       ├── file-scanner/          # Malware Drop-Zone Sandbox
 │       ├── hash/                  # Cryptographic Lookup Interface
-│       ├── ip-checker/            # Packet Routing Telemetry View
-│       ├── password/              # Entropy Breakdown Visualizer
-│       ├── port-scanner/          # Network Service Mapping Grid
-│       └── ssl-checker/           # X.509 Cryptographic Cert Inspector
+│       ├── ip/                    # IP Geolocation & BGP Routing Telemetry
+│       ├── malware/               # Malware Drop-Zone Sandbox
+│       ├── password/              # Password Entropy Visualizer
+│       ├── port/                  # Network Service Mapping Grid
+│       ├── sms/                   # SMS & Smishing Threat Detector
+│       ├── ssl/                   # X.509 Cryptographic Cert Inspector
+│       └── url/                   # Heuristic & ML URL Scanner
 ├── src/
 │   ├── actions/                   # Decoupled Secure Next.js Server Actions (Fetch Tunnels)
 │   │   ├── email.ts
-│   │   ├── file.ts
-│   │   └── [...]
+│   │   ├── hash.ts
+│   │   ├── ip.ts
+│   │   ├── malware.ts
+│   │   ├── password.ts
+│   │   ├── port.ts
+│   │   ├── sms.ts
+│   │   ├── ssl.ts
+│   │   └── url.ts
 │   └── utils/
-│       └── supabase.ts            # Supabase Cloud Client Core Config
-├── engines/                       # Decoupled Python Telemetry Engines (Git Submodules)
-│   ├── sentinel-hash-identifier/  # Port 5002 - Dictionary Attack Analyzer
-│   ├── url-detector/              # Port 5001 - Heuristic Domain Lookup
-│   ├── email-reader/              # Port 5008 - DistilBERT Threat Classifier
-│   ├── password-analyzer/         # Port 5000 - Shannon Entropy Core
-│   ├── ip-checker/                # Port 5005 - GeoIP Telemetry
-│   ├── ssl-checker/               # Port 5006 - TLS ClientHello Parser
-│   ├── port-scanner/              # Port 5003 - TCP SYN Probe Engine
-│   └── file-scanner/              # Port 5004 - YARA Malware Sandbox
-├── .gitmodules                    # Submodule Pointer Configuration Map
+│       └── supabase.ts            # Supabase Cloud Client Config
+├── Email_detector/                # Keras & TF-IDF Email Threat Analyzer (Port 5008)
+├── Hash_Identifier/               # 20+ Hash Identification Engine (Port 5002)
+├── IP_Tracker/                    # Geolocation, ISP & BGP IP Intelligence (Port 5005)
+├── SMS Detector/                  # ML SMS & Smishing Classifier (Port 5007)
+├── URL_detector/                  # Random Forest & Heuristic URL Classifier (Port 5001)
+├── port_scanner/                  # High-Performance Async TCP Port Scanner (Port 5003)
+├── engines/                       # Supporting Microservices (Password, SSL, Malware)
+├── start_all_engines.py           # Master Multi-Engine Orchestrator Launcher
+├── requirements.txt               # Python Dependencies
 ├── package.json                   # Consolidated Node Dependencies & Run Scripts
-└── .env.local                     # Restrictive Cloud Tokens (Never Committed)
+└── .env.example                   # Sample Environment Variables
+```
 
+---
 
+## 🚀 Quick Start
+
+### 1. Prerequisites
+- **Node.js**: v18+ (v20+ recommended)
+- **Python**: 3.9+
+
+### 2. Install Dependencies
+
+```bash
+# Install frontend packages
+npm install
+
+# Install Python microservice requirements
+pip install -r requirements.txt
+```
+
+### 3. Run the Platform
+
+You can run the entire platform (Frontend + All Python Microservices) with a single command:
+
+```bash
+npm run dev
+```
+
+Or run them individually:
+
+```bash
+# Terminal 1: Launch Next.js Frontend (Port 3000)
+npm run dev:ui
+
+# Terminal 2: Launch All Python Telemetry Engines (Ports 5000-5008)
+npm run dev:engines
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view the Cyber Saathi Hub dashboard.

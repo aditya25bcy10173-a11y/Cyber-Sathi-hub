@@ -1,0 +1,139 @@
+# Async Port Scanner
+
+A fast, modular, asynchronous TCP port scanner built using modern Python `asyncio`. It requires **zero external dependencies** and works natively across Windows, Linux, and macOS.
+
+## Features
+
+- ⚡ **High Performance**: Uses asynchronous I/O (`asyncio`) with semaphore-based concurrency control to scan hundreds of ports per second.
+- 🎯 **Flexible Port Targeting**:
+  - Single ports (e.g. `80`)
+  - Comma-delimited lists (e.g. `22,80,443,8080`)
+  - Port ranges (e.g. `8000-8085` or `1-1024`)
+  - Built-in presets: `top20`, `top100`, `web`, `database`
+- 🏷️ **Service Recognition**: Automatic mapping of well-known and registered TCP ports to service names.
+- 🔍 **Banner Grabbing**: Passive detection (protocol announcements) and active benign probing (HTTP `HEAD`) to inspect service details.
+- ⏱️ **Latency Measurement**: Accurate round-trip TCP connection time in milliseconds.
+- 📊 **Multiple Output Formats**:
+  - Terminal table with ASCII borders and real-time progress indicator.
+  - Machine-readable **JSON** (clean stdout, pipeable into `jq`).
+  - **CSV** export for reports and spreadsheets.
+- 📦 **Zero External Dependencies**: Pure Python standard library (`asyncio`, `socket`, `argparse`, `json`, `csv`).
+
+---
+
+## Quickstart
+
+### 1. Basic Scan
+Scan common ports on a local or remote target:
+```bash
+python cli.py -t 127.0.0.1
+```
+
+### 2. Using Presets
+Scan the top 20 most targeted ports:
+```bash
+python cli.py -t 127.0.0.1 --preset top20
+```
+
+Available presets:
+- `top20`: Top 20 critical ports (SSH, HTTP, HTTPS, SMB, RDP, MySQL, etc.)
+- `top100`: Common administrative, web, and infrastructure ports (default)
+- `web`: Web servers and proxies (80, 443, 3000, 5000, 8000, 8080, 8443, 8888, etc.)
+- `database`: Database ports (MySQL, Postgres, MSSQL, Oracle, Redis, MongoDB, Elasticsearch)
+
+### 3. Custom Port Specifications
+Scan specific ports or ranges:
+```bash
+python cli.py -t localhost -p 22,80,443,8000-8080
+```
+
+### 4. Enable Banner Grabbing
+Capture initial protocol banners or server responses:
+```bash
+python cli.py -t localhost -p 22,80,443,3306 --banner
+```
+
+### 5. Display All Ports (Including Closed & Filtered)
+By default, only open ports are shown. Use `--all` to view the status of every probed port:
+```bash
+python cli.py -t 127.0.0.1 -p 80,443,8080 --all
+```
+
+### 6. Export Results
+Export to a JSON or CSV file:
+```bash
+# Save to JSON
+python cli.py -t 127.0.0.1 --preset top20 --format json -o scan_results.json
+
+# Save to CSV
+python cli.py -t 127.0.0.1 -p 1-1024 --format csv -o scan_results.csv
+```
+
+Pipe JSON directly into other tools (logs are isolated to stderr):
+```bash
+python cli.py -t 127.0.0.1 -p 135,445 --format json | jq .
+```
+
+---
+
+## CLI Options Reference
+
+| Flag | Argument | Default | Description |
+|---|---|---|---|
+| `-t`, `--target` | `HOST/IP` | *Required* | Target hostname or IP address |
+| `-p`, `--ports` | `SPEC` | None | Comma-separated ports and ranges (e.g. `80,443,8000-8080`) |
+| `--preset` | `NAME` | `top100` | Port preset: `top20`, `top100`, `web`, `database` |
+| `-c`, `--concurrency`| `INT` | `100` | Maximum simultaneous open connections |
+| `-w`, `--timeout` | `FLOAT` | `1.0` | Connection timeout in seconds |
+| `-b`, `--banner` | None | `False` | Grab service banners / HTTP headers |
+| `--all` | None | `False` | Show closed and filtered ports in output |
+| `--format` | `table\|json\|csv` | `table` | Terminal output format |
+| `-o`, `--output` | `PATH` | None | File path to save output |
+
+---
+
+## Programmatic Usage in Python
+
+You can easily embed `PortScanner` into your own applications:
+
+```python
+import asyncio
+from scanner import PortScanner
+
+async def main():
+    scanner = PortScanner(
+        target="127.0.0.1",
+        concurrency=50,
+        timeout=0.8,
+        grab_banner=True
+    )
+    
+    # Scan selected ports
+    results = await scanner.scan([80, 443, 8080, 3306])
+    
+    for r in results:
+        if r.state.value == "OPEN":
+            print(f"Port {r.port} is OPEN ({r.service}) - {r.latency_ms}ms")
+            if r.banner:
+                print(f"  Banner: {r.banner}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+---
+
+## Running the Tests
+
+To run the automated test suite (including integration tests with mock TCP servers):
+
+```bash
+python test_scanner.py
+```
+
+---
+
+## Security & Ethics Notice
+
+> **Important**: This tool is designed strictly for educational, security auditing, and authorized system administration purposes. Scanning networks or hosts without explicit permission is unauthorized and may violate applicable laws and regulations.
+
