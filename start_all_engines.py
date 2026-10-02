@@ -3,6 +3,13 @@ import sys
 import os
 import time
 
+# Windows console encoding fix
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 ENGINES = [
@@ -21,36 +28,40 @@ processes = []
 
 def start():
     print("=" * 65)
-    print("🛡️  CYBER SAATHI HUB - BACKEND TELEMETRY ORCHESTRATION ENGINE")
+    print("CYBER SAATHI HUB - BACKEND TELEMETRY ORCHESTRATION ENGINE")
     print("=" * 65)
+    
+    env = os.environ.copy()
+    env["PYTHONIOENCODING"] = "utf-8"
+    env["PYTHONUTF8"] = "1"
     
     for name, folder, port in ENGINES:
         engine_dir = os.path.join(BASE_DIR, folder)
         app_file = os.path.join(engine_dir, "app.py")
         
         if not os.path.exists(app_file):
-            print(f"⚠️  Missing app.py for {name} in {engine_dir}")
+            print(f"[-] Missing app.py for {name} in {engine_dir}")
             continue
             
         try:
-            p = subprocess.Popen([sys.executable, "app.py"], cwd=engine_dir)
+            p = subprocess.Popen([sys.executable, "app.py"], cwd=engine_dir, env=env)
             processes.append((name, port, p))
-            print(f"  ✅ [{name:24}] live on Port {port} (PID: {p.pid})")
+            print(f"  [+] [{name:24}] live on Port {port} (PID: {p.pid})")
         except Exception as e:
-            print(f"  ❌ [{name:24}] failed to start: {e}")
+            print(f"  [x] [{name:24}] failed to start: {e}")
 
-    print("\n⚡ All backend microservice engines are online!")
-    print("🌐 Next.js Dashboard connects on http://localhost:3000")
+    print("\nAll backend microservice engines are online!")
+    print("Next.js Dashboard connects on http://localhost:3001")
     print("=" * 65)
     
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print("\n🛑 Shutting down all Cyber Saathi Hub backend engines...")
+        print("\nShutting down all Cyber Saathi Hub backend engines...")
         for name, port, p in processes:
             p.terminate()
-        print("✅ All services stopped.")
+        print("All services stopped.")
 
 if __name__ == "__main__":
     start()
