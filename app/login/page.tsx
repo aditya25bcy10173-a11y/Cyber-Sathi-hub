@@ -68,11 +68,21 @@ export default function Login() {
   const router = useRouter();
   const supabase = createClient();
 
-  // EXISTING LOGIN LOGIC — UNCHANGED
+  const isConfigured = 
+    typeof process.env.NEXT_PUBLIC_SUPABASE_URL === 'string' &&
+    !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder') &&
+    process.env.NEXT_PUBLIC_SUPABASE_URL.startsWith('https://');
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
+    if (!isConfigured) {
+      // Demo bypass when Supabase keys are not set in environment
+      router.push('/');
+      return;
+    }
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -88,11 +98,16 @@ export default function Login() {
     setLoading(false);
   };
 
-  // EXISTING REGISTER LOGIC — UNCHANGED
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
+    if (!isConfigured) {
+      setError('Supabase is in demo mode. You can click Authenticate to enter directly.');
+      setLoading(false);
+      return;
+    }
 
     const { error } = await supabase.auth.signUp({
       email,
