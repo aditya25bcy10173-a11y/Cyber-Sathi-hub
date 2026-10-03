@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Analyzer & Security Suite | Cyber Saathi Hub</title>
+  <meta name="description" content="Production-ready password strength analyzer, pattern detector, k-anonymity breach verification, and cryptographic password generator. 100% Client-Side Privacy.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Dynamic Cyber Background -->
+  <div class="cyber-bg" aria-hidden="true"></div>
+  <div class="cyber-glow" aria-hidden="true"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="top-bar">
+        <a href="/" class="brand-link">
+          ← Return to Cyber Saathi Hub
+        </a>
+        <div class="privacy-badge" title="All processing occurs in memory inside your browser.">
+          <span class="privacy-dot"></span>
+          <span>100% Client-Side Analysis (Zero Server Transmission)</span>
+        </div>
+      </div>
+
+      <div class="hero-title-group">
+        <div class="icon-box" aria-hidden="true">🔐</div>
+        <div>
+          <h1 class="app-title">Password Security Analyzer</h1>
+          <p class="app-subtitle">Cryptographic Entropy, Multi-Pattern Detection & Privacy-Preserving Breach Verification</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="tool-nav" aria-label="Tool Navigation">
+      <button class="tab-btn active" data-target="tabAnalyzer">
+        <span>🔍</span> Password Analyzer
+      </button>
+      <button class="tab-btn" data-target="tabGenerator">
+        <span>🎲</span> Random Password Generator
+      </button>
+      <button class="tab-btn" data-target="tabPassphrase">
+        <span>📖</span> Passphrase Generator
+      </button>
+    </nav>
+
+    <!-- TAB 1: PASSWORD ANALYZER -->
+    <main id="tabAnalyzer" class="tab-content" role="main">
+      <div class="grid-2">
+        
+        <!-- Left Column: Input & Live Analysis -->
+        <section class="cyber-card" aria-labelledby="inputSectionTitle">
+          <h2 id="inputSectionTitle" class="card-title">
+            <span>🛡️</span> Intercept & Evaluate Credential
+          </h2>
+
+          <label for="passwordInput" class="input-label">Enter Target Password</label>
+          <div class="password-field-wrapper">
+            <input 
+              type="password" 
+              id="passwordInput" 
+              class="password-input" 
+              placeholder="Type or paste password to analyze..." 
+              autocomplete="off" 
+              spellcheck="false" 
+              autocapitalize="off"
+            />
+            <button type="button" id="toggleVisibilityBtn" class="btn-toggle-vis" aria-label="Show password">
+              👁️
+            </button>
+          </div>
+
+          <!-- Strength Meter -->
+          <div class="meter-container" aria-live="polite">
+            <div class="meter-header">
+              <span class="meter-label">Password Strength:</span>
+              <span id="strengthText" class="meter-val color-very-weak">Awaiting Input</span>
+            </div>
+            <div class="meter-bar-track">
+              <div id="strengthMeterFill" class="meter-bar-fill color-very-weak"></div>
+            </div>
+          </div>
+
+          <!-- Verbal Explanation "WHY" -->
+          <div class="why-box" id="whyText" aria-live="polite">
+            Please enter a password to begin real-time cryptographic analysis.
+          </div>
+
+          <!-- Privacy-Preserving Breach Verification -->
+          <div class="breach-card">
+            <h3 style="font-size:0.95rem; margin-bottom:0.4rem; color:#fff; display:flex; align-items:center; gap:0.4rem;">
+              <span>🚨</span> Breach Database Lookup (k-Anonymity)
+            </h3>
+            <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:0.85rem; line-height:1.4;">
+              Verify if this password appeared in known data breaches without ever sending your password to the cloud. We compute a local SHA-1 hash and send only the first 5 characters (k-Anonymity).
+            </p>
+            <button type="button" id="btnCheckBreach" class="btn-primary">
+              <span>🔍</span> Verify in Known Data Breaches
+            </button>
+            <div id="breachResultBox" style="margin-top:0.85rem; display:none;"></div>
+          </div>
+        </section>
+
+        <!-- Right Column: Security Score & Properties -->
+        <section class="cyber-card" aria-labelledby="metricsSectionTitle">
+          <h2 id="metricsSectionTitle" class="card-title">
+            <span>📊</span> Cryptographic Metrics & Breakdown
+          </h2>
+
+          <div class="score-badge-row">
+            <div>
+              <div style="font-size:0.75rem; color:var(--text-secondary); font-family:var(--font-mono); text-transform:uppercase;">Overall Security Score</div>
+              <div style="font-size:0.8rem; color:var(--text-muted);">Multi-factor algorithmic weighting</div>
+            </div>
+            <div class="score-number">
+              <span id="scoreValue" class="color-very-weak">0</span><span class="score-max">/100</span>
+            </div>
+          </div>
+
+          <!-- Property Table -->
+          <table class="property-table" aria-label="Password Properties">
+            <tbody>
+              <tr>
+                <td class="prop-name">Password Length</td>
+                <td class="prop-val" id="propLength">0 characters</td>
+              </tr>
+              <tr>
+                <td class="prop-name">Estimated Entropy</td>
+                <td class="prop-val" id="propEntropy">0 bits</td>
+              </tr>
+              <tr>
+                <td class="prop-name">Uppercase Letters (A-Z)</td>
+                <td class="prop-val" id="propUpper"><span class="tag-badge tag-danger">✗ No</span></td>
+              </tr>
+              <tr>
+                <td class="prop-name">Lowercase Letters (a-z)</td>
+                <td class="prop-val" id="propLower"><span class="tag-badge tag-danger">✗ No</span></td>
+              </tr>
+              <tr>
+                <td class="prop-name">Numbers (0-9)</td>
+                <td class="prop-val" id="propNumbers"><span class="tag-badge tag-danger">✗ No</span></td>
+              </tr>
+              <tr>
+                <td class="prop-name">Special Symbols (!@#$)</td>
+                <td class="prop-val" id="propSymbols"><span class="tag-badge tag-danger">✗ No</span></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Estimated Crack Times -->
+          <div style="margin-top:1.5rem;">
+            <h3 style="font-size:0.9rem; font-family:var(--font-mono); color:var(--text-secondary); text-transform:uppercase; margin-bottom:0.5rem;">
+              ⏳ Estimated Crack-Time Scenarios
+            </h3>
+            <div class="crack-times-grid">
+              <div class="crack-card">
+                <div class="crack-title">Online Throttled (100/hr)</div>
+                <div class="crack-val" id="crackOnlineThrottled">Instant</div>
+              </div>
+              <div class="crack-card">
+                <div class="crack-title">Fast Online API (1k/sec)</div>
+                <div class="crack-val" id="crackOnlineUnthrottled">Instant</div>
+              </div>
+              <div class="crack-card">
+                <div class="crack-title">Offline Slow Hash (10k/sec)</div>
+                <div class="crack-val" id="crackOfflineSlow">Instant</div>
+              </div>
+              <div class="crack-card">
+                <div class="crack-title">Offline GPU Rig (100B/sec)</div>
+                <div class="crack-val" id="crackOfflineFast">Instant</div>
+              </div>
+            </div>
+            <p style="font-size:0.72rem; color:var(--text-muted); margin-top:0.4rem; font-family:var(--font-mono);">
+              *Estimates assume automated brute-force attacks across standard computing clusters.
+            </p>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Pattern Warnings & Actionable Hardening -->
+      <div class="grid-2" style="margin-top:1.75rem;">
+        <section class="cyber-card">
+          <h2 class="card-title" style="color:var(--accent-orange);">
+            <span>⚠️</span> Identified Pattern Weaknesses
+          </h2>
+          <ul id="warningsList" class="alert-list">
+            <li class="alert-item" style="background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.1); color:#94a3b8;">
+              <span>ℹ️</span> <span>Enter a password above to scan for patterns.</span>
+            </li>
+          </ul>
+        </section>
+
+        <section class="cyber-card">
+          <h2 class="card-title" style="color:var(--accent-cyan);">
+            <span>💡</span> Practical Hardening Guidance
+          </h2>
+          <ul id="recommendationsList" class="alert-list">
+            <li class="rec-item">
+              <span>💡</span> <span>Enter a password to evaluate its resilience.</span>
+            </li>
+          </ul>
+        </section>
+      </div>
+    </main>
+
+    <!-- TAB 2: RANDOM PASSWORD GENERATOR -->
+    <section id="tabGenerator" class="tab-content" style="display:none;" aria-labelledby="genSectionTitle">
+      <div class="cyber-card" style="max-width:700px; margin:0 auto;">
+        <h2 id="genSectionTitle" class="card-title">
+          <span>🎲</span> Cryptographically Secure Password Generator
+        </h2>
+        <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:1.5rem;">
+          Generates high-entropy passwords using the Web Crypto API (<code style="color:#10b981;">window.crypto.getRandomValues()</code>).
+        </p>
+
+        <div class="generated-output-box">
+          <span id="genOutput">Generating...</span>
+          <button type="button" id="btnCopyGen" class="btn-copy" title="Copy to clipboard">
+            📋 Copy
+          </button>
+        </div>
+
+        <div class="generator-row">
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem;">
+            <label for="genLengthSlider" class="input-label" style="margin-bottom:0;">Password Length</label>
+            <span id="genLengthVal" class="slider-display">16</span>
+          </div>
+          <div class="slider-group">
+            <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono);">8</span>
+            <input type="range" id="genLengthSlider" class="slider-input" min="8" max="64" value="16" />
+            <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono);">64</span>
+          </div>
+        </div>
+
+        <div class="generator-row checkbox-grid">
+          <label class="cyber-checkbox">
+            <input type="checkbox" id="genUpper" checked />
+            <span>Uppercase Letters (A-Z)</span>
+          </label>
+          <label class="cyber-checkbox">
+            <input type="checkbox" id="genLower" checked />
+            <span>Lowercase Letters (a-z)</span>
+          </label>
+          <label class="cyber-checkbox">
+            <input type="checkbox" id="genNumbers" checked />
+            <span>Numbers (0-9)</span>
+          </label>
+          <label class="cyber-checkbox">
+            <input type="checkbox" id="genSymbols" checked />
+            <span>Special Symbols (!@#$)</span>
+          </label>
+          <label class="cyber-checkbox" style="grid-column: span 2;">
+            <input type="checkbox" id="genNoAmbiguous" />
+            <span>Exclude ambiguous characters (i, l, 1, L, o, 0, O, |)</span>
+          </label>
+        </div>
+
+        <div style="display:flex; gap:0.75rem; margin-top:1.5rem;">
+          <button type="button" id="btnGeneratePass" class="btn-primary" style="flex:2;">
+            <span>🔄</span> Generate New Password
+          </button>
+          <button type="button" id="btnTestGen" class="btn-secondary" style="flex:1;">
+            <span>🔍</span> Test in Analyzer
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: PASSPHRASE GENERATOR -->
+    <section id="tabPassphrase" class="tab-content" style="display:none;" aria-labelledby="phraseSectionTitle">
+      <div class="cyber-card" style="max-width:700px; margin:0 auto;">
+        <h2 id="phraseSectionTitle" class="card-title">
+          <span>📖</span> Memorable Diceware Passphrase Generator
+        </h2>
+        <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:1.5rem;">
+          Creates multi-word passphrases that are mathematically hard for computers to crack but easy for humans to remember.
+        </p>
+
+        <div class="generated-output-box">
+          <span id="phraseOutput">Generating...</span>
+          <button type="button" id="btnCopyPhrase" class="btn-copy" title="Copy to clipboard">
+            📋 Copy
+          </button>
+        </div>
+
+        <div class="generator-row">
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem;">
+            <label for="phraseWordsSlider" class="input-label" style="margin-bottom:0;">Number of Words</label>
+            <span id="phraseWordsVal" class="slider-display">5</span>
+          </div>
+          <div class="slider-group">
+            <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono);">3</span>
+            <input type="range" id="phraseWordsSlider" class="slider-input" min="3" max="8" value="5" />
+            <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono);">8</span>
+          </div>
+        </div>
+
+        <div class="generator-row">
+          <label for="phraseSeparator" class="input-label">Word Separator</label>
+          <select id="phraseSeparator" class="password-input" style="padding:0.6rem 1rem; font-size:0.9rem;">
+            <option value="-">Hyphen (-)</option>
+            <option value=".">Period (.)</option>
+            <option value="_">Underscore (_)</option>
+            <option value=" ">Space ( )</option>
+            <option value="">No separator</option>
+          </select>
+        </div>
+
+        <div class="generator-row checkbox-grid">
+          <label class="cyber-checkbox">
+            <input type="checkbox" id="phraseCapitalize" />
+            <span>Capitalize Each Word</span>
+          </label>
+          <label class="cyber-checkbox">
+            <input type="checkbox" id="phraseNumber" />
+            <span>Include Random Number</span>
+          </label>
+          <label class="cyber-checkbox">
+            <input type="checkbox" id="phraseSymbol" />
+            <span>Include Random Symbol</span>
+          </label>
+        </div>
+
+        <div style="display:flex; gap:0.75rem; margin-top:1.5rem;">
+          <button type="button" id="btnGeneratePhrase" class="btn-primary" style="flex:2;">
+            <span>🔄</span> Generate New Passphrase
+          </button>
+          <button type="button" id="btnTestPhrase" class="btn-secondary" style="flex:1;">
+            <span>🔍</span> Test in Analyzer
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Copy Toast Notification -->
+    <div id="copyToast" style="display:none; position:fixed; bottom:2rem; right:2rem; background:#10b981; color:#000; padding:0.85rem 1.25rem; border-radius:10px; font-weight:700; font-family:var(--font-mono); font-size:0.85rem; box-shadow:0 10px 30px rgba(0,0,0,0.8); z-index:100;">
+      ✓ Password copied! Warning: Clear clipboard after pasting.
+    </div>
+
+    <!-- Security & Password Manager Education -->
+    <section class="education-section">
+      <h3 style="font-size:1.15rem; color:#fff; display:flex; align-items:center; gap:0.5rem;">
+        <span>🛡️</span> Password Security Principles & Best Practices
+      </h3>
+      <div class="edu-grid">
+        <div class="edu-card">
+          <h4><span>🔑</span> Use a Password Manager</h4>
+          <p>Instead of memorizing dozens of complex passwords, use an encrypted password manager (e.g. Bitwarden, 1Password, KeePassXC) to generate and store unique credentials.</p>
+        </div>
+        <div class="edu-card">
+          <h4><span>🚫</span> Never Reuse Passwords</h4>
+          <p>Credential stuffing bots automatically test stolen username/password pairs across thousands of websites. If one service is breached, reused passwords compromise all your accounts.</p>
+        </div>
+        <div class="edu-card">
+          <h4><span>📲</span> Enable MFA / 2FA</h4>
+          <p>Multi-Factor Authentication (authenticator apps or hardware security keys) blocks up to 99% of automated account takeover attempts even if your password is stolen.</p>
+        </div>
+        <div class="edu-card">
+          <h4><span>📏</span> Prioritize Length Over Complexity</h4>
+          <p>A 20-character passphrase made of random common words is far more secure and easier to remember than an 8-character password with forced symbols.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Cyber Saathi Hub - Sentinel Security Suite • Built for high-assurance cybersecurity education & defense.</p>
+      <p style="margin-top:0.25rem;">Zero credentials stored or transmitted. All cryptography executes in local browser RAM.</p>
+    </footer>
+  </div>
+
+  <script src="js/analyzer.js"></script>
+  <script src="js/generator.js"></script>
+  <script src="js/breach-check.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
