@@ -79,6 +79,7 @@ CYBER_SATHI_HUB/
 ## 🚀 Quick Start
 
 ### 1. Prerequisites
+
 - **Node.js**: v18+ (v20+ recommended)
 - **Python**: 3.9+
 
